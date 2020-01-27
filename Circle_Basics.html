@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>D3: Putting the SVG's width and height into variables</title>
+		<script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+		<style type="text/css">
+			/* No style rules for this program*/		
+		</style>
+	</head>
+	<body>
+		<script type="text/javascript">
+			
+			//Width and height
+			var w = 500;
+			var h = 50;
+
+            var dataset = [ 5, 10, 15, 20, 25 ]; 
+			
+			//Create SVG element
+			var svg = d3.select("body")
+						.append("svg") //places svg above closing body tag
+						.attr("width", w)
+						.attr("height", h);
+
+            var circles = svg.selectAll('circle')
+                .data(dataset)
+                .enter()
+                .append('circle');
+
+            //the circles.attr...code takes the reference to all circles and sets the cx attribute for each one. 
+            //cx is the x-position value of the center of the circle. 
+            //for each circle, the value d matches the corresponding value in original dataset (5, 10, 15, 20, or 25).
+
+            //value, i, is also automatically populated and just as with d, the name is arbitrary and could be set to whatever I like
+            //i is a numeric index value of the current element. Counting starts at zero.
+            //using i to push each subsequent circle over to the right, because each subsequent loop through, the value of i increases by one
+
+            //To make sure i is available to your custom function, you must include it as an argument in the function definition, function(d, i). 
+            //You must also include d, even if you don’t use d within your function. This is because the
+            //index value is always passed into the second argument; you can’t get the index
+            //without also getting the data value, even if you have no use for the latter.
+	        circles.attr("cx", function(d, i) {
+						return (i * 50) + 25; //when looping through array, i pushes each subsequent circle to the right
+					})
+
+            //cy is the y-position value of the center of each circle. setting cy to h divided by
+            //two, or one-half of h. h stores the height of the entire SVG, so h/2 has
+            //the effect of aligning all circles in the vertical center of the image:             
+				   .attr("cy", h/2)
+
+            //Color fills and strokes are just other attributes that you can set using attr
+                    .attr("fill", "yellow")  //fills circle with color
+                    .attr("stroke", "orange")  //stroke puts border around circle 
+
+            //the radius r of each circle is simply set to d, the corresponding data value. Never use radius to express data values       
+				   .attr("r", function(d) {
+						return d;
+				   });
+
+		</script>
+	</body>
+</html>
+
+<!-- selectAll() will return empty references to all circles (which don’t
+exist yet), data() binds data to the elements we’re about to create, enter()
+returns a placeholder reference to the new element, and append() finally adds a
+circle to the DOM.-->
