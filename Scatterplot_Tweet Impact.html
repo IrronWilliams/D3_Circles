@@ -1,64 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
 <head>
-    <meta charset="UTF-8">
+    <meta charset='UTF-8'>
     <script src='https://d3js.org/d3.v4.min.js'></script>
     <title>Tweet Impact</title>
 </head>
 
 <body>
-<p>Using scatterplot to measure the impact factor of tweets </p>
-<svg id='viz1' height:500px width:500px></svg>
+<p>Using scatterplot to measure the impact factor of tweets. Each tweet is placed along the y-axis using a scale based on the maximum 
+impact factor. Each tweet is positioned vertically based on impact and horizontally based on time. Each tweet is also sized by impact 
+and colored darker based on impact. </p>
 
+<p>Tweets are represented as circles sized by the total number of favorites and retweets, and are placed on the canvas along the x-axis 
+based on the time of the tweet and along the y-axis according to the same impact factor used to size the circles. There are 2 
+tweets with the same impact factor that were made at nearly the same time and are shown overlapping at the bottom left. </p>
+
+<p>Time Scale: timeRamp defines the x axis by time of tweet and places the circles accordingly. Tweets that occured earlier are closer 
+to the left while tweets created later are closer to the right.  </p>
+
+<p>Impact Scale: 3 scales were created to assess impact score of the tweets. yScale determines vertcial position of circle, radiusScale 
+determines size of circle and colorScale determines how light/dark circle is. circles representing tweets with a higher impact score 
+are larger, darker and closer to top of canvas. In comparison, tweets with a lower impact score are smaller, lighter and lower on canvas.
+</p>
+<p>--------------------------------------------------------------------------------------------------------------------------------------------------------------------------</p>
+<p>Viz1: Tweet Impact</p>
+<svg id='viz1' style='width:500px;height:500px;'></svg>
+
+<p>Viz2: Tweet Impact with labels and displayed in red</p>
+<svg id='viz2' style='width:500px;height:500px;'></svg>
+
+<!--Viz1-->
 <script>
-d3.json('tweets.json', data => {dataViz(data.tweets)}) //creates a function called data, return value calls function dataViz and passes it the tweets json file. 
+(function (){
+    d3.json('tweets.json', data => {dataViz(data.tweets)}) //creates a function called data, return value calls function dataViz and passes it the tweets json file. 
 
 /*function receives the tweets.json file from anonomous function above. 
 forEach() calls a provided callback function once for each element in an array in ascending order.
 forEach() has a function entitled 'd' and calculates an impact score by totaling number of favorites and retweets.
-new Date transforms timestamp string variable into a date datatype. */
-function dataViz(incomingData){
-    incomingData.forEach(d => {
-        d.impact = d.retweets.length + d.favorites.length
-        d.tweeTime = new Date(d.timestamp)})
 
-        let maxImpact = d3.max(incomingData, d =>d.impact)
-        let startEnd = d3.extent(incomingData, d =>d.tweeTime) //extent()returns the minimum and maximum value in an array
+dataViz function is basically navigating to the favorites and retweets propereties, which both have arrays as values.
+it then computes impact score by using length to count the number of items within the arrays. 
+new Date transforms timestamp string letiable into a date datatype. */
+      function dataViz(incomingData) {
+        incomingData.forEach(d => {
+          d.impact = d.favorites.length + d.retweets.length
+          d.tweetTime = new Date(d.timestamp)
+        })
 
-       
-      
+/* maxImpact returns the maximum score value.
+startEnd uses extent() which returns the minimum and maximum value in an array. in this case, returns earliest and latest tweet times.
+timeRamp uses d3.scaleTime() which constructs a new time scale with the specified domain and range. accepts startEnd variable.
+yScale and radiusScale values for domains are 0 to max score value.  
+colorScale builds a scale that maps impact to a ramp from white to dark purple. */
+        let maxImpact = d3.max(incomingData, d => d.impact)
+        let startEnd = d3.extent(incomingData, d => d.tweetTime) 
+        let timeRamp = d3.scaleTime().domain(startEnd).range([20,480]) //construct linear scale where input data is in dates and output in numbers. 
+        let yScale = d3.scaleLinear().domain([0,maxImpact]).range([0,460]) // vertical position will be based upon impact 
+        let radiusScale = d3.scaleLinear()
+          .domain([0,maxImpact]).range([1,20])   //size of circle will be based upon impact
+        let colorScale = d3.scaleLinear()
+          .domain([0,maxImpact]).range(['white','#75739F']) //color will be based upon impact
 
+/*appending data to svg*/        
+        d3.select('#viz1')
+          .selectAll('circle')
+          .data(incomingData)
+          .enter()
+          .append('circle')
+            .attr('r', d => radiusScale(d.impact))
+            .attr('cx', d => timeRamp(d.tweetTime))
+            .attr('cy', d => 480 - yScale(d.impact))
+            .style('fill', d => colorScale(d.impact))
+            .style('stroke', 'black')
+            .style('stroke-width', '1px')
+      }
+}) ()
+</script>
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    }
+<!--Viz2 Tweet impact with labels-->
+<script>
+(function (){
+    d3.json('tweets.json', data => {dataViz(data.tweets)})  
 
+      function dataViz(incomingData) {
+        incomingData.forEach(d => {
+          d.impact = d.favorites.length + d.retweets.length
+          d.tweetTime = new Date(d.timestamp)
+        })
 
+        let maxImpact = d3.max(incomingData, d => d.impact)
+        let startEnd = d3.extent(incomingData, d => d.tweetTime) 
+        let timeRamp = d3.scaleTime().domain(startEnd).range([20,480])  
+        let yScale = d3.scaleLinear().domain([0,maxImpact]).range([0,460])  
+        let radiusScale = d3.scaleLinear()
+          .domain([0,maxImpact]).range([1,20])   
+        let colorScale = d3.scaleLinear()
+          .domain([0,maxImpact]).range(['white','#990000']) 
 
-
-
+/*appending data to svg*/        
+        d3.select('#viz2')
+          .selectAll('circle')
+          .data(incomingData)
+          .enter()
+          .append('circle')
+            .attr('r', d => radiusScale(d.impact))
+            .attr('cx', d => timeRamp(d.tweetTime))
+            .attr('cy', d => 480 - yScale(d.impact))
+            .style('fill', d => colorScale(d.impact))
+            .style('stroke', 'black')
+            .style('stroke-width', '1px')
+      }
+}) ()
 </script>
     
 </body>
 </html>
-
-<!--
-    create svg  width:500px height:500px
-    import data 
-        -> create anonomous function that calls a function that process data and sends the data as argument data => {data.tweetz}
-    process data
-        -> create function that accepts parameter for data
-        -> create variables for scales 
-
-    append data to svg
-
--->

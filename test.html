@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <script src='https://d3js.org/d3.v4.min.js'></script>
+    <title>Tweet Test</title>
+</head>
+
+<body>
+<p>Using scatterplot to measure the impact factor of tweets </p>
+<svg style='width:500px;height:500px;'>
+    </svg>
+
+<script>
+d3.json('tweets.json', data => {dataViz(data.tweets)}) //creates a function called data, return value calls function dataViz and passes it the tweets json file. 
+
+/*function receives the tweets.json file from anonomous function above. 
+forEach() calls a provided callback function once for each element in an array in ascending order.
+forEach() has a function entitled 'd' and calculates an impact score by totaling number of favorites and retweets.
+new Date transforms timestamp string letiable into a date datatype. */
+      function dataViz(incomingData) {
+        incomingData.forEach(d => {
+          d.impact = d.favorites.length + d.retweets.length
+          d.tweetTime = new Date(d.timestamp)
+
+          //console.log(d.tweetTime)
+        })
+
+        let maxImpact = d3.max(incomingData, d => d.impact)
+        let startEnd = d3.extent(incomingData, d => d.tweetTime) 
+        let timeRamp = d3.scaleTime().domain(startEnd).range([20,480])
+        let yScale = d3.scaleLinear().domain([0,maxImpact]).range([0,460])
+        let radiusScale = d3.scaleLinear()
+          .domain([0,maxImpact]).range([1,20])
+        let colorScale = d3.scaleLinear()
+          .domain([0,maxImpact]).range(['white','990000'])
+
+        console.log(`maxImpact = ${maxImpact}`)
+        console.log(`startEnd = ${startEnd}`)
+        console.log(`timeRamp = ${timeRamp}`)
+        console.log(`yScale = ${yScale}`)
+        console.log(`radiusScale = ${radiusScale}`)
+        console.log(`colorScale = ${colorScale}`)             
+        
+        
+        }
+
+</script>
+    
+</body>
+</html>
+
+<!--
+    create svg  width:500px height:500px
+    import data 
+        -> create anonomous function that calls a function that process data and sends the data as argument data => {data.tweetz}
+    process data
+        -> create function that accepts parameter for data
+        -> create letiables for scales 
+
+    append data to svg
+
+-->
