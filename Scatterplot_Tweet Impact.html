@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src='https://d3js.org/d3.v4.min.js'></script>
+    <title>Tweet Impact</title>
+</head>
+
+<body>
+<p>Using scatterplot to measure the impact factor of tweets </p>
+<svg id='viz1' height:500px width:500px></svg>
+
+<script>
+d3.json('tweets.json', data => {dataViz(data.tweets)}) //creates a function called data, return value calls function dataViz and passes it the tweets json file. 
+
+/*function receives the tweets.json file from anonomous function above. 
+forEach() calls a provided callback function once for each element in an array in ascending order.
+forEach() has a function entitled 'd' and calculates an impact score by totaling number of favorites and retweets.
+new Date transforms timestamp string variable into a date datatype. */
+function dataViz(incomingData){
+    incomingData.forEach(d => {
+        d.impact = d.retweets.length + d.favorites.length
+        d.tweeTime = new Date(d.timestamp)})
+
+        let maxImpact = d3.max(incomingData, d =>d.impact)
+        let startEnd = d3.extent(incomingData, d =>d.tweeTime) //extent()returns the minimum and maximum value in an array
+
+       
+      
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    }
+
+
+
+
+
+</script>
+    
+</body>
+</html>
+
+<!--
+    create svg  width:500px height:500px
+    import data 
+        -> create anonomous function that calls a function that process data and sends the data as argument data => {data.tweetz}
+    process data
+        -> create function that accepts parameter for data
+        -> create variables for scales 
+
+    append data to svg
+
+-->
