@@ -51,24 +51,27 @@ new Date transforms timestamp string letiable into a date datatype. */
 startEnd uses extent() which returns the minimum and maximum value in an array. in this case, returns earliest and latest tweet times.
 timeRamp uses d3.scaleTime() which constructs a new time scale with the specified domain and range. accepts startEnd variable.
 yScale and radiusScale values for domains are 0 to max score value.  
-colorScale builds a scale that maps impact to a ramp from white to dark purple. */
+colorScale builds a scale that maps impact to a ramp from white to dark purple. 
+
+these statements define variables and scales used for scatterplot. the max tweet value is used to scale  
+color, size and vertical position of circles*/
         let maxImpact = d3.max(incomingData, d => d.impact)
         let startEnd = d3.extent(incomingData, d => d.tweetTime) 
         let timeRamp = d3.scaleTime().domain(startEnd).range([20,480]) //construct linear scale where input data is in dates and output in numbers. 
-        let yScale = d3.scaleLinear().domain([0,maxImpact]).range([0,460]) // vertical position will be based upon impact 
+        let yScale = d3.scaleLinear().domain([0,maxImpact]).range([0,460]) // vertical position will be based upon impact value
         let radiusScale = d3.scaleLinear()
-          .domain([0,maxImpact]).range([1,20])   //size of circle will be based upon impact
+          .domain([0,maxImpact]).range([1,20])   //size of circle will be based upon impact value
         let colorScale = d3.scaleLinear()
-          .domain([0,maxImpact]).range(['white','#75739F']) //color will be based upon impact
+          .domain([0,maxImpact]).range(['white','#75739F']) //color will be based upon impact value
 
-/*appending data to svg*/        
+/*appending data to svg. r, cx, cy are required*/        
         d3.select('#viz1')
           .selectAll('circle')
           .data(incomingData)
           .enter()
           .append('circle')
-            .attr('r', d => radiusScale(d.impact))
-            .attr('cx', d => timeRamp(d.tweetTime))
+            .attr('r', d => radiusScale(d.impact)) //creates radius of each impact score
+            .attr('cx', d => timeRamp(d.tweetTime)) //defines the x-axis based upon time of tweet
             .attr('cy', d => 480 - yScale(d.impact))
             .style('fill', d => colorScale(d.impact))
             .style('stroke', 'black')
@@ -87,7 +90,9 @@ colorScale builds a scale that maps impact to a ramp from white to dark purple. 
           d.impact = d.favorites.length + d.retweets.length
           d.tweetTime = new Date(d.timestamp)
         })
-
+        
+        /* defining variables/scales used for scatterplot. max tweet value used to scale  
+        color, size and vertical position of circles*/
         let maxImpact = d3.max(incomingData, d => d.impact)
         let startEnd = d3.extent(incomingData, d => d.tweetTime) 
         let timeRamp = d3.scaleTime().domain(startEnd).range([20,480])  
@@ -97,18 +102,26 @@ colorScale builds a scale that maps impact to a ramp from white to dark purple. 
         let colorScale = d3.scaleLinear()
           .domain([0,maxImpact]).range(['white','#990000']) 
 
-/*appending data to svg*/        
-        d3.select('#viz2')
-          .selectAll('circle')
+/*appending text to circles, need to append <g> elements to svg canvas. Because the data is bound to these elements, can use the same 
+syntax when adding child elements. Since using <g> elements, need to set the position using the transform attribute. 
+Can add child elements to the .append() function, and declare it as a variable tweetG. This allows tweetG to stand in for 
+d3.select("svg").selectAll("g") so saves steps retyping throught code*/        
+         let tweetG = d3.select('#viz2')
+          .selectAll('g')
           .data(incomingData)
           .enter()
-          .append('circle')
+          .append('g')
+            .attr('transform', d =>
+              `translate( ${timeRamp(d.tweetTime)} , ${(480 - yScale(d.impact))} )`) //translate works much like changing cx and cy for circles
+        
+        tweetG.append('circle')
             .attr('r', d => radiusScale(d.impact))
-            .attr('cx', d => timeRamp(d.tweetTime))
-            .attr('cy', d => 480 - yScale(d.impact))
-            .style('fill', d => colorScale(d.impact))
+            .style('fill', '#990000') //#75739F
             .style('stroke', 'black')
             .style('stroke-width', '1px')
+        
+        tweetG.append('text')
+        	.text(d => `${d.user}-${d.tweetTime.getHours()}`) //set the label to be the name of the person making the tweet, followed by a dash, followed by the hour of the tweet
       }
 }) ()
 </script>
