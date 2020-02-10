@@ -12,12 +12,15 @@
     </svg>
 
 <script>
-d3.json('tweets.json', data => {dataViz(data.tweets)}) //creates a function called data, return value calls function dataViz and passes it the tweets json file. 
+
+//d3.json('tweets.json', data => {dataViz(data.tweets)}) //creates a function called data, return value calls function dataViz and passes it the tweets json file. 
 
 /*function receives the tweets.json file from anonomous function above. 
 forEach() calls a provided callback function once for each element in an array in ascending order.
 forEach() has a function entitled 'd' and calculates an impact score by totaling number of favorites and retweets.
 new Date transforms timestamp string letiable into a date datatype. */
+
+  /*  
       function dataViz(incomingData) {
         incomingData.forEach(d => {
           d.impact = d.favorites.length + d.retweets.length
@@ -40,10 +43,11 @@ new Date transforms timestamp string letiable into a date datatype. */
         console.log(`timeRamp = ${timeRamp}`)
         console.log(`yScale = ${yScale}`)
         console.log(`radiusScale = ${radiusScale}`)
-        console.log(`colorScale = ${colorScale}`)             
-        
-        
-        }
+        console.log(`colorScale = ${colorScale}`)                          
+        } 
+  */
+  d3.csv('worldcup.csv', data=>{console.log(data)})
+ 
 
 </script>
     

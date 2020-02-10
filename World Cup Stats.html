@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <title>2014 World Cup Stats</title>
+    <meta charset='UTF-8'>
+    <script src='https://d3js.org/d3.v4.min.js'></script>
+    <link type='text/css' rel='stylesheet' href='d3ia.css'/>
+</head>
+
+<script source='colorbrewer.js'></script>
+
+<body>
+<div id='viz'>
+    <svg style='width:500px;height:500px;border:1px lightgray solid'></svg>
+</div>
+<div id='controls'></div>
+
+    
+    <script>
+    /*d3.csv() loads file, calls function and passes argument. process parses the data and creates an array 
+    of objects with key:value relationships. the column names are values and data in rows are 
+    value.  the number of objects is based upon the number of rows in csv file.  
+    Object0: {team: "Germany", region: "UEFA", win: "7", loss: "6", draw: "0", …}
+    Object1: {team: "Argentina", region: "CONMEBOL", win: "7", loss: "5", draw: "1", …}
+    Object7: {team: "United States", region: "CONCACAF", win: "4", loss: "1", draw: "2", …}
+    */
+    d3.csv('worldcup.csv', data => {overallTeamViz(data)}) 
+    
+    /* Statements create circles and labels from the worldcup.csv representing 2014 World Cup statistics.
+       whenever g is used, need to set the position using the transform attribute*/
+    function overallTeamViz(incomingData) {
+        d3.select('svg')
+          .append('g')  //appends a <g> to the svg canvas to move g and center its contents more easily 
+            .attr('id', 'teamsG')
+            .attr('transform', 'translate(50,300)') //moves circles along the x and y axis  
+          .selectAll('g')
+          .data(incomingData)
+          .enter()
+          .append('g')
+            .attr('class', 'overallG')
+            .attr('transform', (d, i) =>`translate(${(i * 50)}, 0)`) //creates a <g> for each team to add labels/other elements. when looping thru dataset, i pushes each subsequent circle to the right
+
+        let teamG = d3.selectAll('g.overallG') // assigns the selection to a variable to refer to it/avoid retyping d3.SelectAll()
+        
+        teamG
+          .append('circle') 
+            .attr('r', 20)
+        
+        teamG
+          .append('text')
+            .style('text-anchor', 'middle')
+            .attr('y', 30)
+            .text(d => d.team) //applies the name of each team to respective circle 
+        
+        /*This section builds interactivity by use of events, which define behaviors based on user activity.        
+        Purpose of statements is to bind a filtered array to a selection, create buttons for  
+        attributes (numeric columns from csv file) and give the buttons labels for each of the attributes.
+        Buttons for each numerical attribute are appended to the controls div. When a button is clicked, the code runs buttonClick.
+        Buttons update the visualization by changing the appearance of graphics to correspond with different data.
+
+        Object.keys function returns the names of the attributes of an object as an array. Filtered array to remove the team and region
+        attributes because these have nonnumerical data and won’t be suitable for the buttonClick functionality. 
+
+        The .on function is a wrapper for the traditional HTML mouse eventt and accepts 'click', 'mouseover', 'mouseout', etc. 
+        The .on function sends the bound data to the function automatically and in the same format as the anonymous inline functions 
+        previously used to set style and attribute.
+
+        The buttonClick function resizes the circles based on the numerical value of the associated attribute. The radius of each circle 
+        reflects the number of goals scored against each team, kept in the ga attribute of each datapoint.*/ 
+
+        let dataKeys = Object.keys(incomingData[0]) //Object.keys returns an array of column names. incomingData[0] = 'team'
+          .filter(d => d !== 'team' && d !== 'region') //function entitled d looks through the array and filters out team and region
+        
+        d3.select('#controls').selectAll('button.teams') //selects controls from the DOM and sets the stage to append buttons inside of the div
+          .data(dataKeys).enter() //binding the filtered array entitled dataKeys
+          .append('button')  //appending a button for each of the remaining column names (or names of the attributes of the object incomingData)
+            .on('click', buttonClick) //when button is clicked, sends the bound data assocaiated with the clicked button to function buttonClick
+            .html(d => d)
+        
+        /*these statements update buttons based on the attributes of the data and dynamically measure the data based on the attribute bound 
+        to the button. Also resize the circles representing each team to reflect the teams with the highest and lowest values in each category*/
+        function buttonClick(datapoint) { //receives bound data from clicked button 
+          let maxValue = d3.max(incomingData, d => parseFloat(d[datapoint])) //finds max value, function d converts datapoint from string to number
+          let radiusScale = d3.scaleLinear()  //creates linear scale and assigns maxValue
+            .domain([ 0, maxValue ]).range([ 2, 20 ])
+          d3.selectAll('g.overallG').select('circle') //applies updates to the g.overallG class and applies the scaled radius to r
+            .attr('r', d => radiusScale(d[datapoint]))
+        }
+      
+      
+      
+      
+      
+      
+      
+      
+      } //closing bracket for main funtion
+    
+    
+    
+    
+    </script>
+</body>
+</html>
